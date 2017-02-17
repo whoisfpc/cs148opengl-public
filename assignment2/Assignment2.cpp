@@ -3,6 +3,7 @@
 #include "common/Utility/Mesh/Simple/PrimitiveCreator.h"
 #include "common/Utility/Mesh/Loading/MeshLoader.h"
 #include <cmath>
+#include <fstream>
 
 namespace
 {
@@ -48,6 +49,8 @@ Assignment2::Assignment2(std::shared_ptr<class Scene> inputScene, std::shared_pt
             {-1.f, 1.f, 0.f, 1.f},
             {-1.f, 0.f, 0.f, 1.f}
         });
+
+	time = 0.0f;
 }
 
 std::unique_ptr<Application> Assignment2::CreateApplication(std::shared_ptr<class Scene> scene, std::shared_ptr<class Camera> camera)
@@ -90,12 +93,30 @@ void Assignment2::HandleWindowResize(float x, float y)
 void Assignment2::SetupExample1()
 {
     // Insert "Load and Compile Shaders" code here.
+	const std::string vertPath = std::string(STRINGIFY(SHADER_PATH)) + "/hw2/hw2.vert";
+	const std::string fragPath = std::string(STRINGIFY(SHADER_PATH)) + "/hw2/hw2.frag";
+	std::ifstream vertIn(vertPath);
+	std::ifstream fragIn(fragPath);
+	std::string vertStr((std::istreambuf_iterator<char>(vertIn)), std::istreambuf_iterator<char>());
+	std::string fragStr((std::istreambuf_iterator<char>(fragIn)), std::istreambuf_iterator<char>());
 
+	const GLuint vertShader = glCreateShader(GL_VERTEX_SHADER);
+	const GLuint fragShader = glCreateShader(GL_FRAGMENT_SHADER);
+	const GLchar *c_vertStr = vertStr.c_str();
+	const GLchar *c_fragStr = fragStr.c_str();
+	glShaderSource(vertShader, 1, &c_vertStr, NULL);
+	glShaderSource(fragShader, 1, &c_fragStr, NULL);
+	glCompileShader(vertShader);
+	glCompileShader(fragShader);
+	program = glCreateProgram();
+	glAttachShader(program, vertShader);
+	glAttachShader(program, fragShader);
+	glLinkProgram(program);
     // Checkpoint 1.
     // Modify this part to contain your vertex shader ID, fragment shader ID, and shader program ID.
-    const GLuint vertexShaderId = 0;
-    const GLuint fragmentShaderId = 0;
-    const GLuint shaderProgramId = 0;
+	const GLuint vertexShaderId = vertShader;
+	const GLuint fragmentShaderId = fragShader;
+	const GLuint shaderProgramId = program;
 
     // DO NOT EDIT OR REMOVE THE CODE IN THIS SECTION
     if (!VerifyShaderCompile(vertexShaderId) || !VerifyShaderCompile(fragmentShaderId) || !VerifyProgramLink(shaderProgramId)) {
@@ -111,9 +132,24 @@ void Assignment2::SetupExample1()
     // FINISH DO NOT EDIT OR REMOVE THE CODE IN THIS SECTION
 
     // Insert "Setup Buffers" code here.
+	glGenVertexArrays(1, &vao);
+	glBindVertexArray(vao);
+	GLuint bufferId;
+	glGenBuffers(1, &bufferId);
+	glBindBuffer(GL_ARRAY_BUFFER, bufferId);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(glm::vec4) * vertexPositions.size(), &vertexPositions[0], GL_STATIC_DRAW);
+	glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 0, 0);
+	glEnableVertexAttribArray(0);
 }
 
 void Assignment2::Tick(double deltaTime)
 {
     // Insert "Send Buffers to the GPU" and "Slightly-More Advanced Shaders" code here.
+	time += deltaTime;
+	glUseProgram(program);
+	GLint timeLocation = glGetUniformLocation(program, "inputTime");
+	glUniform1f(timeLocation, time);
+	glBindVertexArray(vao);
+	glDrawArrays(GL_TRIANGLES, 0, vertexPositions.size());
+
 }
