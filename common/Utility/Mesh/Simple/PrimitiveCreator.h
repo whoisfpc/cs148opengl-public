@@ -45,6 +45,11 @@ std::shared_ptr<RenderingObject> CreateIcoSphere(std::shared_ptr<ShaderProgram> 
  */
 std::shared_ptr<RenderingObject> CreatePlane(std::shared_ptr<ShaderProgram> inputShader);
 
+/*! \brief Creates a Tetrahedron with side length is 1.
+ *  \param inputShader The shader to use.
+ */
+std::shared_ptr<RenderingObject> CrrateTetrahedron(std::shared_ptr<ShaderProgram> inputShader);
+
 }
 
 #endif

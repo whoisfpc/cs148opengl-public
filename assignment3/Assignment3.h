@@ -11,7 +11,7 @@ public:
     Assignment3(std::shared_ptr<class Scene> inputScene, std::shared_ptr<class Camera> inputCamera);
 
     static std::unique_ptr<Application> CreateApplication(std::shared_ptr<class Scene> scene, std::shared_ptr<class Camera> camera);
-    static std::shared_ptr<class Camera> CreateCamera();
+    static std::shared_ptr<Camera> CreateCamera();
 
     virtual glm::vec2 GetWindowSize() const;
 

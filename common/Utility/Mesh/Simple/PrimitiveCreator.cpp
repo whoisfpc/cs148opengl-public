@@ -45,6 +45,36 @@ std::shared_ptr<RenderingObject> CreatePlane(std::shared_ptr<ShaderProgram> inpu
     return newObj;
 }
 
+std::shared_ptr<RenderingObject> CrrateTetrahedron(std::shared_ptr<ShaderProgram> inputShader)
+{
+	std::unique_ptr<RenderingObject::PositionArray> vertexPositions = make_unique<RenderingObject::PositionArray>();
+	vertexPositions->emplace_back(0.f, 0, 0.f, 1.f);
+	vertexPositions->emplace_back(1.f, 0, 0.f, 1.f);
+	vertexPositions->emplace_back(0.5f, 0, 0.5f * std::sqrtf(3.f), 1.f);
+	vertexPositions->emplace_back(0.5f, std::sqrtf(2.f/3.f), std::sqrtf(3.f)/6.f, 1.f);
+
+	std::unique_ptr<RenderingObject::NormalArray> vertexNormals = make_unique<RenderingObject::NormalArray>();
+	vertexNormals->emplace_back(-0.5f * std::sqrtf(3.f) , 0.f, -0.5f);
+	vertexNormals->emplace_back(0.5f * std::sqrtf(3.f), 0.f, -0.5f);
+	vertexNormals->emplace_back(0.f, 0.f, 1.f);
+	vertexNormals->emplace_back(0.f, 1.f, 0.f);
+
+	RenderingObject::IndexArray vertexIndices = {
+		0, 1, 2,
+		0, 3, 1,
+		1, 3, 2,
+		2, 3, 0
+	};
+
+	std::shared_ptr<RenderingObject> newObj = std::make_shared<RenderingObject>(std::move(inputShader),
+		std::move(vertexPositions),
+		make_unique<RenderingObject::IndexArray>(std::move(vertexIndices)),
+		std::move(vertexNormals)
+	);
+
+	return newObj;
+}
+
 std::shared_ptr<RenderingObject> CreateIcoSphere(std::shared_ptr<ShaderProgram> inputShader, float radius, int refinementSteps)
 {
     // First generate an icosahedron and then subdivide it to get the final sphere.

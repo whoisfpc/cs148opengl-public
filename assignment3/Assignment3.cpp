@@ -121,7 +121,8 @@ void Assignment3::SetupExample1()
     shader->SetDiffuse(glm::vec4(0.8f, 0.8f, 0.8f, 1.f));
     shader->SetAmbient(glm::vec4(0.5f));
 
-    std::shared_ptr<RenderingObject> sphereTemplate = PrimitiveCreator::CreateIcoSphere(shader, 5.f, 4);
+    //std::shared_ptr<RenderingObject> sphereTemplate = PrimitiveCreator::CreateIcoSphere(shader, 5.f, 4);
+	std::shared_ptr<RenderingObject> sphereTemplate = PrimitiveCreator::CrrateTetrahedron(shader);
 
     // Give a R/G/B color to each vertex to visualize the sphere.
     auto totalVertices = sphereTemplate->GetTotalVertices();
@@ -163,7 +164,8 @@ void Assignment3::SetupExample2()
     shader->SetDiffuse(glm::vec4(0.8f, 0.8f, 0.8f, 1.f));
     shader->SetAmbient(glm::vec4(0.5f));
 
-    std::vector<std::shared_ptr<RenderingObject>> meshTemplate = MeshLoader::LoadMesh(shader, "outlander/Model/Outlander_Model.obj");
+    //std::vector<std::shared_ptr<RenderingObject>> meshTemplate = MeshLoader::LoadMesh(shader, "outlander/Model/Outlander_Model.obj");
+	std::vector<std::shared_ptr<RenderingObject>> meshTemplate = MeshLoader::LoadMesh(shader, "laman/laman.obj");
     if (meshTemplate.empty()) {
         std::cerr << "ERROR: Failed to load the model. Check your paths." << std::endl;
         return;

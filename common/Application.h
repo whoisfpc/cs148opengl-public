@@ -43,14 +43,14 @@ public:
      *
      *  The subclass should also create a function CreateScene() that returns the proper type of Scene to create.
      */
-    static std::shared_ptr<class Scene> CreateScene();
+    static std::shared_ptr<Scene> CreateScene();
 
     /*! \brief Creates a shared pointer of type Camera.
      *  \returns A shared pointer to a Camera.
      *
      *  The subclass should also create a function CreateCamera() that returns the proper type of Camera to create.
      */
-    static std::shared_ptr<class Camera> CreateCamera();
+    static std::shared_ptr<Camera> CreateCamera();
 
     /*! \brief Creates a shared pointer of type Renderer.
      *  \returns A unique pointer to a Renderer.
