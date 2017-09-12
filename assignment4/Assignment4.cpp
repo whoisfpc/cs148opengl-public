@@ -3,8 +3,11 @@
 #include "common/Utility/Mesh/Simple/PrimitiveCreator.h"
 #include "common/Utility/Mesh/Loading/MeshLoader.h"
 #include "common/Utility/Texture/TextureLoader.h"
+#include "common/Rendering/Shaders/EpicShader.h"
 
 #include <cmath>
+
+#define DISABLE_OPENGL_SUBROUTINES
 
 Assignment4::Assignment4(std::shared_ptr<class Scene> inputScene, std::shared_ptr<class Camera> inputCamera):
     Application(std::move(inputScene), std::move(inputCamera))
@@ -111,15 +114,15 @@ void Assignment4::SetupExample1()
     };
 #else
     std::unordered_map<GLenum, std::string> shaderSpec = {
-        { GL_VERTEX_SHADER, "brdf/blinnphong/frag/noSubroutine/blinnphong.vert" },
-        { GL_FRAGMENT_SHADER, "brdf/blinnphong/frag/noSubroutine/blinnphong.frag"}
+        { GL_VERTEX_SHADER, "brdf/blinnphong/frag/noSubroutine/epic.vert" },
+        { GL_FRAGMENT_SHADER, "brdf/blinnphong/frag/noSubroutine/epic.frag"}
     };
 #endif
-    std::shared_ptr<BlinnPhongShader> shader = std::make_shared<BlinnPhongShader>(shaderSpec, GL_FRAGMENT_SHADER);
+    std::shared_ptr<EpicShader> shader = std::make_shared<EpicShader>(shaderSpec, GL_FRAGMENT_SHADER);
     shader->SetDiffuse(glm::vec4(0.8f, 0.8f, 0.8f, 1.f));
     shader->SetSpecular(glm::vec4(1.f, 1.f, 1.f, 1.f), 40.f);
 
-    std::shared_ptr<BlinnPhongShader> groundShader = std::make_shared<BlinnPhongShader>(shaderSpec, GL_FRAGMENT_SHADER);
+    std::shared_ptr<EpicShader> groundShader = std::make_shared<EpicShader>(shaderSpec, GL_FRAGMENT_SHADER);
     shader->SetDiffuse(glm::vec4(0.8f, 0.8f, 0.8f, 1.f));
 
     std::unique_ptr<LightProperties> lightProperties = make_unique<LightProperties>();
