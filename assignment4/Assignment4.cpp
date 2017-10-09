@@ -4,6 +4,7 @@
 #include "common/Utility/Mesh/Loading/MeshLoader.h"
 #include "common/Utility/Texture/TextureLoader.h"
 #include "common/Rendering/Shaders/EpicShader.h"
+#include "common/Scene/Light/EpicLightProperties.h"
 
 #include <cmath>
 
@@ -119,19 +120,30 @@ void Assignment4::SetupExample1()
     };
 #endif
     std::shared_ptr<EpicShader> shader = std::make_shared<EpicShader>(shaderSpec, GL_FRAGMENT_SHADER);
-    shader->SetRoughness(1.f);
-    shader->SetSpecular(1.f);
+    shader->SetRoughness(2.f);
 
     std::shared_ptr<EpicShader> groundShader = std::make_shared<EpicShader>(shaderSpec, GL_FRAGMENT_SHADER);
-    shader->SetRoughness(1.f);
+    shader->SetRoughness(2.f);
 
-    std::unique_ptr<LightProperties> lightProperties = make_unique<LightProperties>();
-    lightProperties->diffuseColor = glm::vec4(1.f, 1.f, 1.f, 1.f);
-    lightProperties->specularColor = glm::vec4(1.f, 1.f, 1.f, 1.f);
+    std::unique_ptr<EpicLightProperties> pointLightProperties = make_unique<EpicLightProperties>();
+	pointLightProperties->diffuseColor = glm::vec4(1.f, 1.f, 1.f, 1.f);
+	pointLightProperties->radius = 20.0f;
 
-    pointLight = std::make_shared<Light>(std::move(lightProperties));
+    pointLight = std::make_shared<Light>(std::move(pointLightProperties), Light::LightType::POINT);
     pointLight->SetPosition(glm::vec3(10.f, 10.f, 10.f));
     scene->AddLight(pointLight);
+
+	std::unique_ptr<EpicLightProperties> sunLightProperties = make_unique<EpicLightProperties>();
+	sunLightProperties->diffuseColor = glm::vec4(1.f, 0.957f, 0.84f, 1.f);
+	sunLightProperties->direction = glm::vec4(-1.f, -1.f, -1.f, 1.f);
+	sunLight = std::make_shared<Light>(std::move(sunLightProperties), Light::LightType::DIRECTIONAL);
+	scene->AddLight(sunLight);
+
+	std::unique_ptr<EpicLightProperties> hemiLightProperties = make_unique<EpicLightProperties>();
+	hemiLightProperties->skyColor = glm::vec4(0.f, 0.f, 1.f, 1.f);
+	hemiLightProperties->groundColor = glm::vec4(0.f, 1.f, 0.f, 1.f);
+	hemisphereLight = std::make_shared<Light>(std::move(hemiLightProperties), Light::LightType::HEMISPHERE);
+	scene->AddLight(hemisphereLight);
 
     GenericSetupExample(shader, groundShader);
 

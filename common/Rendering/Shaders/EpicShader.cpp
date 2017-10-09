@@ -2,6 +2,7 @@
 #include "common/Rendering/Textures/Texture2D.h"
 #include "common/Scene/Light/Light.h"
 #include "common/Scene/Light/LightProperties.h"
+#include "common/Scene/Light/EpicLightProperties.h"
 #include "common/Scene/Camera/Camera.h"
 #include "common/Utility/Texture/TextureLoader.h"
 #include "assimp/material.h"
@@ -16,7 +17,7 @@ std::array<const char*, 3> EpicShader::MATERIAL_PROPERTY_NAMES = {
 const int EpicShader::MATERIAL_BINDING_POINT = 0;
 
 EpicShader::EpicShader(const std::unordered_map<GLenum, std::string>& inputShaders, GLenum lightingStage):
-    ShaderProgram(inputShaders), roughness(1.f), specular(1.f), metallic(1.f), ambient(glm::vec3(0.1f), 1.f), 
+    ShaderProgram(inputShaders), roughness(2.f), specular(0.f), metallic(0.f), ambient(glm::vec3(0.1f), 1.f), 
     materialBlockLocation(0), materialBlockSize(0), materialBuffer(0),
     lightingShaderStage(lightingStage), maxDisplacement(0.5f)
 {
@@ -52,15 +53,30 @@ void EpicShader::SetupShaderLighting(const Light* light) const
         SetShaderUniform("lightingType", static_cast<int>(Light::LightType::GLOBAL));
 #endif
     } else {
+		const EpicLightProperties* lightProperties = static_cast<const EpicLightProperties*>(light->GetPropertiesRaw());
         // Select proper lighting subroutine based on the light's type.
         switch(light->GetLightType()) {
         case Light::LightType::POINT:
 #ifndef DISABLE_OPENGL_SUBROUTINES
-            SetShaderSubroutine("inputLightSubroutine", "pointLightSubroutine", lightingShaderStage);
+			SetShaderSubroutine("inputLightSubroutine", "pointLightSubroutine", lightingShaderStage);
 #else
-            SetShaderUniform("lightingType", static_cast<int>(Light::LightType::POINT));
+			SetShaderUniform("lightingType", static_cast<int>(Light::LightType::POINT));
+			SetShaderUniform("pointLight.radius", lightProperties->radius);
 #endif
-            break;
+			break;
+		case Light::LightType::DIRECTIONAL:
+#ifdef DISABLE_OPENGL_SUBROUTINES
+			SetShaderUniform("lightingType", static_cast<int>(Light::LightType::DIRECTIONAL));
+			SetShaderUniform("directionalLight.direction", light->GetForwardDirection());
+#endif
+			break;
+		case Light::LightType::HEMISPHERE:
+#ifdef DISABLE_OPENGL_SUBROUTINES
+			SetShaderUniform("lightingType", static_cast<int>(Light::LightType::HEMISPHERE));
+			SetShaderUniform("hemisphereLight.csky", lightProperties->skyColor);
+			SetShaderUniform("hemisphereLight.cground", lightProperties->groundColor);
+#endif
+			break;
         default:
             std::cerr << "WARNING: Light type is not supported. Defaulting to global light. Your output may look wrong. -- Ignoring: " << static_cast<int>(light->GetLightType()) << std::endl;
 #ifndef DISABLE_OPENGL_SUBROUTINES
@@ -71,9 +87,7 @@ void EpicShader::SetupShaderLighting(const Light* light) const
             break;
         }
 
-        // Get the light's properties and pass it into the shader.
-        const LightProperties* lightProperty = light->GetPropertiesRaw();
-        SetShaderUniform("genericLight.color", lightProperty->diffuseColor);
+        SetShaderUniform("genericLight.color", lightProperties->diffuseColor);
         light->SetupShaderUniforms(this);
     }
     UpdateAttenuationUniforms(light);
