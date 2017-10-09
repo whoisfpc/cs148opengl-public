@@ -62,6 +62,11 @@ void Assignment4::HandleInput(SDL_Keysym key, Uint32 state, Uint8 repeat, double
             SetupExample1();
         }
         break;
+	case SDLK_2:
+		if (!repeat && state == SDL_KEYDOWN) {
+			SetupExample2();
+		}
+		break;
     case SDLK_UP:
         camera->Rotate(glm::vec3(camera->GetRightDirection()), 0.1f);
         break;
@@ -123,7 +128,7 @@ void Assignment4::SetupExample1()
     shader->SetRoughness(2.f);
 
     std::shared_ptr<EpicShader> groundShader = std::make_shared<EpicShader>(shaderSpec, GL_FRAGMENT_SHADER);
-    shader->SetRoughness(2.f);
+	groundShader->SetRoughness(2.f);
 
     std::unique_ptr<EpicLightProperties> pointLightProperties = make_unique<EpicLightProperties>();
 	pointLightProperties->diffuseColor = glm::vec4(1.f, 1.f, 1.f, 1.f);
@@ -190,6 +195,54 @@ void Assignment4::GenericSetupExample(std::shared_ptr<ShaderProgram> shader, std
     plane->SetVertexColors(std::move(groundColor));
 
     scene->AddSceneObject(groundObject);
+}
+
+void Assignment4::SetupExample2()
+{
+	scene->ClearScene();
+#ifndef DISABLE_OPENGL_SUBROUTINES
+	std::unordered_map<GLenum, std::string> shaderSpec = {
+		{ GL_VERTEX_SHADER, "brdf/blinnphong/frag/blinnphong.vert" },
+		{ GL_FRAGMENT_SHADER, "brdf/blinnphong/frag/blinnphong.frag" }
+	};
+#else
+	std::unordered_map<GLenum, std::string> shaderSpec = {
+		{ GL_VERTEX_SHADER, "brdf/blinnphong/frag/noSubroutine/epic.vert" },
+		{ GL_FRAGMENT_SHADER, "brdf/blinnphong/frag/noSubroutine/epic.frag" }
+	};
+#endif
+	std::shared_ptr<EpicShader> shader = std::make_shared<EpicShader>(shaderSpec, GL_FRAGMENT_SHADER);
+	shader->SetRoughness(2.f);
+
+	std::unique_ptr<EpicLightProperties> pointLightProperties = make_unique<EpicLightProperties>();
+	pointLightProperties->diffuseColor = glm::vec4(1.f, 1.f, 1.f, 1.f);
+	pointLightProperties->radius = 20.0f;
+
+	pointLight = std::make_shared<Light>(std::move(pointLightProperties), Light::LightType::POINT);
+	pointLight->SetPosition(glm::vec3(10.f, 10.f, 10.f));
+	scene->AddLight(pointLight);
+
+	std::unique_ptr<EpicLightProperties> sunLightProperties = make_unique<EpicLightProperties>();
+	sunLightProperties->diffuseColor = glm::vec4(1.f, 0.957f, 0.84f, 1.f);
+	sunLightProperties->direction = glm::vec4(-1.f, -1.f, -1.f, 1.f);
+	sunLight = std::make_shared<Light>(std::move(sunLightProperties), Light::LightType::DIRECTIONAL);
+	scene->AddLight(sunLight);
+
+	std::unique_ptr<EpicLightProperties> hemiLightProperties = make_unique<EpicLightProperties>();
+	hemiLightProperties->skyColor = glm::vec4(0.f, 0.f, 1.f, 1.f);
+	hemiLightProperties->groundColor = glm::vec4(0.f, 1.f, 0.f, 1.f);
+	hemisphereLight = std::make_shared<Light>(std::move(hemiLightProperties), Light::LightType::HEMISPHERE);
+	scene->AddLight(hemisphereLight);
+
+	//std::vector<std::shared_ptr<RenderingObject>> meshTemplate = MeshLoader::LoadMesh(shader, "outlander/Model/Outlander_Model.obj");
+	std::vector<std::shared_ptr<RenderingObject>> meshTemplate = MeshLoader::LoadMesh(shader, "laman/laman.obj");
+	if (meshTemplate.empty()) {
+		std::cerr << "ERROR: Failed to load the model. Check your paths." << std::endl;
+		return;
+	}
+
+	sceneObject = std::make_shared<SceneObject>(meshTemplate);
+	scene->AddSceneObject(sceneObject);
 }
 
 void Assignment4::Tick(double deltaTime)

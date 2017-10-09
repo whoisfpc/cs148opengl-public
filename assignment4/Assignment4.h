@@ -24,6 +24,7 @@ private:
     virtual void SetupScene();
 
     virtual void SetupExample1();
+	virtual void SetupExample2();
     virtual void GenericSetupExample(std::shared_ptr<class ShaderProgram> shader, std::shared_ptr<ShaderProgram> groundShader);
 
     virtual void SetupCamera();
@@ -32,6 +33,7 @@ private:
     std::shared_ptr<class Light> hemisphereLight;
     std::shared_ptr<class Light> pointLight;
     std::vector<std::shared_ptr<class SceneObject>> sphereDance;
+	std::shared_ptr<class SceneObject> sceneObject;
 };
 
 #endif
