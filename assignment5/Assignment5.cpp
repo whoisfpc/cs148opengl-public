@@ -34,7 +34,7 @@ void Assignment5::SetupScene()
 
 void Assignment5::SetupCamera()
 {
-    camera->SetPosition(glm::vec3(0.f, 0.f, 2.f));
+    //camera->SetPosition(glm::vec3(0.f, 0.f, 2.f));
 }
 
 void Assignment5::HandleInput(SDL_Keysym key, Uint32 state, Uint8 repeat, double timestamp, double deltaTime)
@@ -100,6 +100,12 @@ void Assignment5::HandleWindowResize(float x, float y)
 void Assignment5::SetupExample1()
 {
     scene->ClearScene();
+	camera->Reset();
+	camera->SetPosition(glm::vec3(144.1055, 90.56099, 105.3604));
+	std::static_pointer_cast<PerspectiveCamera>(camera)->SetZFar(1000.f);
+	camera->Rotate(glm::vec3(SceneObject::GetWorldUp()), 0.88f);
+	camera->Rotate(glm::vec3(camera->GetRightDirection()), -0.38f);
+
 #ifndef DISABLE_OPENGL_SUBROUTINES
     std::unordered_map<GLenum, std::string> shaderSpec = {
         { GL_VERTEX_SHADER, "brdf/blinnphong/fragTexture/blinnphong.vert" },
@@ -113,27 +119,28 @@ void Assignment5::SetupExample1()
 #endif
     std::shared_ptr<BlinnPhongShader> shader = std::make_shared<BlinnPhongShader>(shaderSpec, GL_FRAGMENT_SHADER);
     shader->SetDiffuse(glm::vec4(0.8f, 0.8f, 0.8f, 1.f));
-    shader->SetTexture(BlinnPhongShader::TextureSlots::DIFFUSE, TextureLoader::LoadTexture("brick/bricktexture.jpg"));
-    shader->SetTexture(BlinnPhongShader::TextureSlots::SPECULAR, TextureLoader::LoadTexture("brick/bricktexture.jpg"));
-    shader->SetTexture(BlinnPhongShader::TextureSlots::NORMAL, TextureLoader::LoadTexture("brick/bricktexture_norm.jpg"));
-    shader->SetTexture(BlinnPhongShader::TextureSlots::DISPLACEMENT, TextureLoader::LoadTexture("brick/bricktexture_displacement.jpg"));
-    shader->SetMaxDisplacement(0.1f);
+    shader->SetTexture(BlinnPhongShader::TextureSlots::DIFFUSE, TextureLoader::LoadTexture("laman/laman.png"));
+    //shader->SetTexture(BlinnPhongShader::TextureSlots::SPECULAR, TextureLoader::LoadTexture("brick/bricktexture.jpg"));
+    //shader->SetTexture(BlinnPhongShader::TextureSlots::NORMAL, TextureLoader::LoadTexture("brick/bricktexture_norm.jpg"));
+    //shader->SetTexture(BlinnPhongShader::TextureSlots::DISPLACEMENT, TextureLoader::LoadTexture("brick/bricktexture_displacement.jpg"));
+    //shader->SetMaxDisplacement(0.1f);
+	shader->SetAmbient(glm::vec4(0.2f));
 
     std::unique_ptr<LightProperties> lightProperties = make_unique<LightProperties>();
     lightProperties->diffuseColor = glm::vec4(1.f, 1.f, 1.f, 1.f);
     lightProperties->specularColor = glm::vec4(1.f, 1.f, 1.f, 1.f);
 
     std::shared_ptr<Light> pointLight = std::make_shared<Light>(std::move(lightProperties));
-    pointLight->SetPosition(glm::vec3(10.f, 10.f, 10.f));
+    pointLight->SetPosition(glm::vec3(22.6f, 30.8f, 23.8f));
     scene->AddLight(pointLight);
 
-    std::vector<std::shared_ptr<RenderingObject>> sphereTemplate = MeshLoader::LoadMesh(shader, "sphere.obj");
+    std::vector<std::shared_ptr<RenderingObject>> sphereTemplate = MeshLoader::LoadMesh(shader, "laman/laman.obj");
     for (size_t i = 0; i < sphereTemplate.size(); ++i) {
         sphereTemplate[i]->ComputeTangentSpace();
     }
 
     std::shared_ptr<class SceneObject> sceneObject = std::make_shared<SceneObject>(sphereTemplate);
-    sceneObject->Rotate(glm::vec3(SceneObject::GetWorldRight()), PI / 4.f);
+    //sceneObject->Rotate(glm::vec3(SceneObject::GetWorldRight()), PI / 4.f);
     scene->AddSceneObject(sceneObject);
 
 
@@ -161,6 +168,8 @@ void Assignment5::SetupExample1()
 void Assignment5::SetupExample2()
 {
     scene->ClearScene();
+	camera->Reset();
+	camera->SetPosition(glm::vec3(0.f, 0.f, 2.f));
 #ifndef DISABLE_OPENGL_SUBROUTINES
     std::unordered_map<GLenum, std::string> shaderSpec = {
         { GL_VERTEX_SHADER, "brdf/blinnphong/fragTexture/blinnphong.vert" },

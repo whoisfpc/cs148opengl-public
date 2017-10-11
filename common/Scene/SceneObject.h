@@ -106,6 +106,13 @@ public:
      */
     static glm::vec4 GetWorldForward();
 
+	//
+	// Functions to reset object's transform
+	//
+	/*! \brief reset object's position, rotation and scale
+	 */
+	void Reset();
+
     //
     // Functions to transform the object.
     //

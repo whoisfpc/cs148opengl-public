@@ -100,6 +100,16 @@ void SceneObject::SetPosition(const glm::vec3& in)
     UpdateTransformationMatrix();
 }
 
+void SceneObject::Reset()
+{
+	position.x = position.y = position.z = 0.f;
+	position.w = 1.f;
+	rotation.w = 1.f;
+	rotation.x = rotation.y = rotation.z = 0.f;
+	scale.x = scale.y = scale.z = 1.f;
+	UpdateTransformationMatrix();
+}
+
 void SceneObject::Translate(const glm::vec3& translation)
 {
     position += glm::vec4(translation, 0.f);
