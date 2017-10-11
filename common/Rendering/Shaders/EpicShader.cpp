@@ -67,7 +67,7 @@ void EpicShader::SetupShaderLighting(const Light* light) const
 		case Light::LightType::DIRECTIONAL:
 #ifdef DISABLE_OPENGL_SUBROUTINES
 			SetShaderUniform("lightingType", static_cast<int>(Light::LightType::DIRECTIONAL));
-			SetShaderUniform("directionalLight.direction", light->GetForwardDirection());
+			SetShaderUniform("directionalLight.direction", lightProperties->direction);
 #endif
 			break;
 		case Light::LightType::HEMISPHERE:
@@ -136,13 +136,6 @@ void EpicShader::SetupShaderMaterials() const
     }
     assert(diffuseTexture);
     diffuseTexture->BeginRender(static_cast<int>(TextureSlots::DIFFUSE));
-
-    const Texture* specularTexture = defaultTexture.get();
-    if (textureSlotMapping.find(TextureSlots::SPECULAR) != textureSlotMapping.end()) {
-        specularTexture = textureSlotMapping.at(TextureSlots::SPECULAR).get();
-    }
-    assert(specularTexture);
-    specularTexture->BeginRender(static_cast<int>(TextureSlots::SPECULAR));
     
     if (textureSlotMapping.find(TextureSlots::NORMAL) != textureSlotMapping.end()) {
         const Texture* normalTexture = textureSlotMapping.at(TextureSlots::NORMAL).get();
@@ -162,7 +155,6 @@ void EpicShader::SetupShaderMaterials() const
 
     // While we're here, also setup the textures too.
     SetShaderUniform("diffuseTexture", static_cast<int>(TextureSlots::DIFFUSE));
-    SetShaderUniform("specularTexture", static_cast<int>(TextureSlots::SPECULAR));
     SetShaderUniform("normalTexture", static_cast<int>(TextureSlots::NORMAL));
     SetShaderUniform("displacementTexture", static_cast<int>(TextureSlots::DISPLACEMENT));
     SetShaderUniform("maxDisplacement", maxDisplacement);
@@ -223,13 +215,6 @@ void EpicShader::LoadMaterialFromAssimp(std::shared_ptr<aiMaterial> assimpMateri
         assimpMaterial->GetTexture(aiTextureType_DIFFUSE, 0, &aiDiffusePath);
         std::string diffusePath(aiDiffusePath.C_Str());
         SetTexture(TextureSlots::DIFFUSE, TextureLoader::LoadTexture(diffusePath));
-    }
-
-    if (assimpMaterial->GetTextureCount(aiTextureType_SPECULAR)) {
-        aiString aiSpecularPath;
-        assimpMaterial->GetTexture(aiTextureType_SPECULAR, 0, &aiSpecularPath);
-        std::string specularPath(aiSpecularPath.C_Str());
-        SetTexture(TextureSlots::SPECULAR, TextureLoader::LoadTexture(specularPath));
     }
 
     UpdateMaterialBlock();

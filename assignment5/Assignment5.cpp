@@ -3,6 +3,10 @@
 #include "common/Utility/Mesh/Simple/PrimitiveCreator.h"
 #include "common/Utility/Mesh/Loading/MeshLoader.h"
 #include "common/Utility/Texture/TextureLoader.h"
+#include "common/Rendering/Shaders/EpicShader.h"
+#include "common/Scene/Light/EpicLightProperties.h"
+
+#define DISABLE_OPENGL_SUBROUTINES
 
 Assignment5::Assignment5(std::shared_ptr<class Scene> inputScene, std::shared_ptr<class Camera> inputCamera):
     Application(std::move(inputScene), std::move(inputCamera))
@@ -113,26 +117,34 @@ void Assignment5::SetupExample1()
     };
 #else
     std::unordered_map<GLenum, std::string> shaderSpec = {
-        { GL_VERTEX_SHADER, "brdf/blinnphong/fragTexture/noSubroutine/blinnphong.vert" },
-        { GL_FRAGMENT_SHADER, "brdf/blinnphong/fragTexture/noSubroutine/blinnphong.frag"}
+        { GL_VERTEX_SHADER, "brdf/blinnphong/fragTexture/noSubroutine/epic.vert" },
+        { GL_FRAGMENT_SHADER, "brdf/blinnphong/fragTexture/noSubroutine/epic.frag"}
     };
 #endif
-    std::shared_ptr<BlinnPhongShader> shader = std::make_shared<BlinnPhongShader>(shaderSpec, GL_FRAGMENT_SHADER);
-    shader->SetDiffuse(glm::vec4(0.8f, 0.8f, 0.8f, 1.f));
-    shader->SetTexture(BlinnPhongShader::TextureSlots::DIFFUSE, TextureLoader::LoadTexture("laman/laman.png"));
-    //shader->SetTexture(BlinnPhongShader::TextureSlots::SPECULAR, TextureLoader::LoadTexture("brick/bricktexture.jpg"));
-    //shader->SetTexture(BlinnPhongShader::TextureSlots::NORMAL, TextureLoader::LoadTexture("brick/bricktexture_norm.jpg"));
-    //shader->SetTexture(BlinnPhongShader::TextureSlots::DISPLACEMENT, TextureLoader::LoadTexture("brick/bricktexture_displacement.jpg"));
-    //shader->SetMaxDisplacement(0.1f);
+    std::shared_ptr<EpicShader> shader = std::make_shared<EpicShader>(shaderSpec, GL_FRAGMENT_SHADER);
+	shader->SetRoughness(2.f);
+    shader->SetTexture(EpicShader::TextureSlots::DIFFUSE, TextureLoader::LoadTexture("laman/laman.png"));
 	shader->SetAmbient(glm::vec4(0.2f));
 
-    std::unique_ptr<LightProperties> lightProperties = make_unique<LightProperties>();
-    lightProperties->diffuseColor = glm::vec4(1.f, 1.f, 1.f, 1.f);
-    lightProperties->specularColor = glm::vec4(1.f, 1.f, 1.f, 1.f);
+	std::unique_ptr<EpicLightProperties> pointLightProperties = make_unique<EpicLightProperties>();
+	pointLightProperties->diffuseColor = glm::vec4(1.f, 1.f, 1.f, 1.f);
+	pointLightProperties->radius = 100.0f;
+	std::shared_ptr<Light> pointLight = std::make_shared<Light>(std::move(pointLightProperties), Light::LightType::POINT);
+	pointLight->SetPosition(glm::vec3(22.6f, 30.8f, 23.8f));
+	scene->AddLight(pointLight);
 
-    std::shared_ptr<Light> pointLight = std::make_shared<Light>(std::move(lightProperties));
-    pointLight->SetPosition(glm::vec3(22.6f, 30.8f, 23.8f));
-    scene->AddLight(pointLight);
+	std::unique_ptr<EpicLightProperties> pointLightProperties2 = make_unique<EpicLightProperties>();
+	pointLightProperties2->diffuseColor = glm::vec4(1.f, 1.f, 1.f, 1.f);
+	pointLightProperties2->radius = 100.0f;
+	std::shared_ptr<Light> pointLight2 = std::make_shared<Light>(std::move(pointLightProperties2), Light::LightType::POINT);
+	pointLight2->SetPosition(glm::vec3(22.6f, 39.6f, -43.9f));
+	scene->AddLight(pointLight2);
+
+	std::unique_ptr<EpicLightProperties> sunLightProperties = make_unique<EpicLightProperties>();
+	sunLightProperties->diffuseColor = glm::vec4(1.f, 0.957f, 0.84f, 1.f);
+	sunLightProperties->direction = glm::vec4(-1.f, -1.f, -1.f, 1.f);
+	std::shared_ptr<Light>sunLight = std::make_shared<Light>(std::move(sunLightProperties), Light::LightType::DIRECTIONAL);
+	//scene->AddLight(sunLight);
 
     std::vector<std::shared_ptr<RenderingObject>> sphereTemplate = MeshLoader::LoadMesh(shader, "laman/laman.obj");
     for (size_t i = 0; i < sphereTemplate.size(); ++i) {
@@ -140,7 +152,6 @@ void Assignment5::SetupExample1()
     }
 
     std::shared_ptr<class SceneObject> sceneObject = std::make_shared<SceneObject>(sphereTemplate);
-    //sceneObject->Rotate(glm::vec3(SceneObject::GetWorldRight()), PI / 4.f);
     scene->AddSceneObject(sceneObject);
 
 
